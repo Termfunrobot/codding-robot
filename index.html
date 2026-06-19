@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ระบบเขียนคำสั่งควบคุมหุ่นยนต์ PRO V3.0 (Blockly Style)</title>
-    <!-- โหลด Tailwind CSS ผ่าน CDN พร้อมตั้งค่า Dark Mode -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -15,59 +14,43 @@
         @import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&display=swap');
         body { font-family: 'Sarabun', sans-serif; }
         
-        /* ซ่อน Scrollbar เล็กน้อยเพื่อความสวยงาม */
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 4px; }
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
         ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
-        
-        /* สไตล์ Scrollbar สำหรับ Dark Mode */
         .dark ::-webkit-scrollbar-track { background: #1e293b; }
         .dark ::-webkit-scrollbar-thumb { background: #475569; }
         .dark ::-webkit-scrollbar-thumb:hover { background: #64748b; }
 
-        /* สไตล์พิเศษสำหรับ Scratch-style Blocks */
-        .block-connection-top {
-            clip-path: polygon(0% 0%, 15% 0%, 20% 8px, 35% 8px, 40% 0%, 100% 0%, 100% 100%, 0% 100%);
+        /* รูปทรงจิ๊กซอว์แบบเชื่อมต่อสนิท (Jigsaw Shape) */
+        .jigsaw-block {
+            clip-path: polygon(
+                0% 0%, 
+                24px 0%, 28px 8px, 42px 8px, 46px 0%, 
+                100% 0%, 
+                100% calc(100% - 8px), 
+                46px calc(100% - 8px), 42px 100%, 28px 100%, 24px calc(100% - 8px), 
+                0% calc(100% - 8px)
+            );
+            transition: background-color 0.2s, filter 0.2s;
         }
-        
-        .robot-block {
+
+        .robot-block-wrapper {
             position: relative;
-            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
+            /* เงาด้านนอกแบบกำหนดเอง ให้ซ้อนทับกันมีมิติ */
+            filter: drop-shadow(0 3px 2px rgba(0,0,0,0.25));
+            transition: transform 0.2s, filter 0.2s;
+        }
+
+        .robot-block {
             user-select: none;
             cursor: grab;
-            transition: transform 0.15s, box-shadow 0.15s;
         }
 
         .robot-block:active {
             cursor: grabbing;
         }
 
-        /* รูปทรงจิกซอว์เชื่อมต่อของบล็อก */
-        .puzzle-block {
-            background-size: 100% 100%;
-            /* สร้างรอยหยักบน (เข้า) และรอยหยักล่าง (ออก) เลียนแบบรูปที่คุณอัปโหลด */
-            position: relative;
-            border-radius: 8px;
-            padding: 10px 14px 14px 14px;
-        }
-        
-        /* ตัวต่อเว้าด้านบน */
-        .puzzle-block::before {
-            content: "";
-            position: absolute;
-            top: 0;
-            left: 24px;
-            width: 20px;
-            height: 6px;
-            background: inherit;
-            border-bottom-left-radius: 4px;
-            border-bottom-right-radius: 4px;
-            transform: translateY(-100%);
-            display: none; /* ใช้ clip-path แทนเพื่อความเนียน */
-        }
-
-        /* สำหรับการลากวาง */
         .drag-over-line {
             height: 4px;
             background-color: #3b82f6;
@@ -80,112 +63,89 @@
 <body class="min-h-screen bg-slate-50 dark:bg-slate-900 p-4 sm:p-6 text-slate-800 dark:text-slate-100 transition-colors duration-200">
     <div class="max-w-[1550px] w-full mx-auto space-y-6 relative">
         
-        <!-- ส่วนหัวเรื่อง -->
         <header class="text-center space-y-2 mb-6 relative pt-4">
-            <!-- ปุ่มสลับโหมดกลางวัน/กลางคืน -->
             <div class="absolute right-0 top-0">
                 <button id="theme-toggle-btn" onclick="toggleTheme()" class="p-2 text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-full transition-colors" title="สลับโหมดกลางวัน/กลางคืน">
-                    <!-- Icon จะถูกวาดด้วย JS -->
                 </button>
             </div>
 
-            <h1 class="text-3xl font-bold text-slate-800 dark:text-slate-100 flex items-center justify-center gap-3">
-                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-blue-600 dark:text-blue-400"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M12 8v4"/><path d="M8 12h0"/><path d="M16 12h0"/><path d="M9 16h6"/></svg>
+            <h1 class="text-4xl font-bold text-slate-800 dark:text-slate-100 flex items-center justify-center gap-3">
+                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-blue-600 dark:text-blue-400"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M12 8v4"/><path d="M8 12h0"/><path d="M16 12h0"/><path d="M9 16h6"/></svg>
                 Robot Block Controller PRO
             </h1>
-            <p class="text-slate-500 dark:text-slate-400 text-sm">ออกแบบชุดคำสั่งด้วย "บล็อกโปรแกรมมิ่งสไตล์จิกซอว์" ปรับพารามิเตอร์ในบล็อกได้ทันที แล้วจำลองหรือส่งไปยังหุ่นยนต์จริง!</p>
+            <p class="text-slate-500 dark:text-slate-400 text-base">ออกแบบชุดคำสั่งด้วย "บล็อกโปรแกรมมิ่งสไตล์จิกซอว์" ปรับพารามิเตอร์ในบล็อกได้ทันที แล้วจำลองหรือส่งไปยังหุ่นยนต์จริง!</p>
         </header>
 
-        <!-- โครงสร้างหลัก 3 คอลัมน์ -->
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
             
-            <!-- ================= พาเนลซ้าย (3/12): คลังบล็อกคำสั่งที่มีให้เลือก ================= -->
             <div class="lg:col-span-3 space-y-6">
                 
-                <!-- 1. คลังคำสั่ง (Block Toolbox) -->
                 <div class="bg-white dark:bg-slate-800 p-5 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 transition-colors">
-                    <h2 class="text-base font-bold text-slate-700 dark:text-slate-200 mb-4 flex items-center gap-2">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-blue-500"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
-                        กล่องบล็อกคำสั่ง (Toolbox)
+                    <h2 class="text-lg font-bold text-slate-700 dark:text-slate-200 mb-4 flex items-center gap-2">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-blue-500"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+                        กล่องบล็อกคำสั่ง
                     </h2>
-                    <p class="text-xs text-slate-400 dark:text-slate-500 mb-4">คลิกที่คำสั่งเพื่อสร้างบล็อกใหม่เข้าไปยังพื้นที่โปรแกรมด้านขวา</p>
+                    <p class="text-sm text-slate-400 dark:text-slate-500 mb-4">คลิกที่คำสั่งเพื่อสร้างบล็อกใหม่ (จัดหมวดหมู่สีเพื่อง่ายต่อการจำ)</p>
                     
                     <div class="flex flex-col gap-3">
-                        <!-- เดินหน้า -->
-                        <button onclick="addBlock('FORWARD')" class="group flex items-center justify-between p-3 bg-blue-50 dark:bg-blue-950/40 hover:bg-blue-100 dark:hover:bg-blue-900/40 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800/80 rounded-xl transition-all active:scale-95 text-left text-sm font-semibold">
-                            <span class="flex items-center gap-2.5">
-                                <span class="p-1.5 bg-blue-500 text-white rounded-lg group-hover:scale-110 transition-transform"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m5 12 7-7 7 7"/><path d="M12 19V5"/></svg></span>
+                        <button onclick="addBlock('FORWARD')" onmouseenter="speakCommand('เดินหน้า')" class="group flex items-center justify-between p-4 bg-blue-50 dark:bg-blue-950/40 hover:bg-blue-100 dark:hover:bg-blue-900/40 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800/80 rounded-xl transition-all active:scale-95 text-left text-base font-bold">
+                            <span class="flex items-center gap-3">
+                                <span class="p-2 bg-blue-500 text-white rounded-lg group-hover:scale-110 transition-transform"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m5 12 7-7 7 7"/><path d="M12 19V5"/></svg></span>
                                 เดินหน้า (Forward)
                             </span>
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
                         </button>
 
-                        <!-- ถอยหลัง -->
-                        <button onclick="addBlock('BACKWARD')" class="group flex items-center justify-between p-3 bg-orange-50 dark:bg-orange-950/40 hover:bg-orange-100 dark:hover:bg-orange-900/40 text-orange-700 dark:text-orange-300 border border-orange-200 dark:border-orange-800/80 rounded-xl transition-all active:scale-95 text-left text-sm font-semibold">
-                            <span class="flex items-center gap-2.5">
-                                <span class="p-1.5 bg-orange-500 text-white rounded-lg group-hover:scale-110 transition-transform"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14"/><path d="m19 12-7 7-7-7"/></svg></span>
+                        <button onclick="addBlock('BACKWARD')" onmouseenter="speakCommand('ถอยหลัง')" class="group flex items-center justify-between p-4 bg-blue-50 dark:bg-blue-950/40 hover:bg-blue-100 dark:hover:bg-blue-900/40 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800/80 rounded-xl transition-all active:scale-95 text-left text-base font-bold">
+                            <span class="flex items-center gap-3">
+                                <span class="p-2 bg-blue-500 text-white rounded-lg group-hover:scale-110 transition-transform"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14"/><path d="m19 12-7 7-7-7"/></svg></span>
                                 ถอยหลัง (Backward)
                             </span>
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
                         </button>
 
-                        <!-- หมุนซ้าย -->
-                        <button onclick="addBlock('TURN_LEFT')" class="group flex items-center justify-between p-3 bg-purple-50 dark:bg-purple-950/40 hover:bg-purple-100 dark:hover:bg-purple-900/40 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-800/80 rounded-xl transition-all active:scale-95 text-left text-sm font-semibold">
-                            <span class="flex items-center gap-2.5">
-                                <span class="p-1.5 bg-purple-500 text-white rounded-lg group-hover:scale-110 transition-transform"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg></span>
+                        <button onclick="addBlock('TURN_LEFT')" onmouseenter="speakCommand('หมุนซ้าย')" class="group flex items-center justify-between p-4 bg-blue-50 dark:bg-blue-950/40 hover:bg-blue-100 dark:hover:bg-blue-900/40 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800/80 rounded-xl transition-all active:scale-95 text-left text-base font-bold">
+                            <span class="flex items-center gap-3">
+                                <span class="p-2 bg-blue-500 text-white rounded-lg group-hover:scale-110 transition-transform"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg></span>
                                 หมุนซ้าย (Turn Left)
                             </span>
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
                         </button>
 
-                        <!-- หมุนขวา -->
-                        <button onclick="addBlock('TURN_RIGHT')" class="group flex items-center justify-between p-3 bg-pink-50 dark:bg-pink-950/40 hover:bg-pink-100 dark:hover:bg-pink-900/40 text-pink-700 dark:text-pink-300 border border-pink-200 dark:border-pink-800/80 rounded-xl transition-all active:scale-95 text-left text-sm font-semibold">
-                            <span class="flex items-center gap-2.5">
-                                <span class="p-1.5 bg-pink-500 text-white rounded-lg group-hover:scale-110 transition-transform"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/></svg></span>
+                        <button onclick="addBlock('TURN_RIGHT')" onmouseenter="speakCommand('หมุนขวา')" class="group flex items-center justify-between p-4 bg-blue-50 dark:bg-blue-950/40 hover:bg-blue-100 dark:hover:bg-blue-900/40 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800/80 rounded-xl transition-all active:scale-95 text-left text-base font-bold">
+                            <span class="flex items-center gap-3">
+                                <span class="p-2 bg-blue-500 text-white rounded-lg group-hover:scale-110 transition-transform"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/></svg></span>
                                 หมุนขวา (Turn Right)
                             </span>
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
                         </button>
 
-                        <!-- สไลด์ซ้าย -->
-                        <button onclick="addBlock('SLIDE_LEFT')" class="group flex items-center justify-between p-3 bg-cyan-50 dark:bg-cyan-950/40 hover:bg-cyan-100 dark:hover:bg-cyan-900/40 text-cyan-700 dark:text-cyan-300 border border-cyan-200 dark:border-cyan-800/80 rounded-xl transition-all active:scale-95 text-left text-sm font-semibold">
-                            <span class="flex items-center gap-2.5">
-                                <span class="p-1.5 bg-cyan-500 text-white rounded-lg group-hover:scale-110 transition-transform"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5"/><path d="m12 19-7-7 7-7"/></svg></span>
+                        <button onclick="addBlock('SLIDE_LEFT')" onmouseenter="speakCommand('สไลด์ซ้าย')" class="group flex items-center justify-between p-4 bg-blue-50 dark:bg-blue-950/40 hover:bg-blue-100 dark:hover:bg-blue-900/40 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800/80 rounded-xl transition-all active:scale-95 text-left text-base font-bold">
+                            <span class="flex items-center gap-3">
+                                <span class="p-2 bg-blue-500 text-white rounded-lg group-hover:scale-110 transition-transform"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5"/><path d="m12 19-7-7 7-7"/></svg></span>
                                 สไลด์ซ้าย (Slide Left)
                             </span>
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
                         </button>
 
-                        <!-- สไลด์ขวา -->
-                        <button onclick="addBlock('SLIDE_RIGHT')" class="group flex items-center justify-between p-3 bg-sky-50 dark:bg-sky-950/40 hover:bg-sky-100 dark:hover:bg-sky-900/40 text-sky-700 dark:text-sky-300 border border-sky-200 dark:border-sky-800/80 rounded-xl transition-all active:scale-95 text-left text-sm font-semibold">
-                            <span class="flex items-center gap-2.5">
-                                <span class="p-1.5 bg-sky-500 text-white rounded-lg group-hover:scale-110 transition-transform"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></span>
+                        <button onclick="addBlock('SLIDE_RIGHT')" onmouseenter="speakCommand('สไลด์ขวา')" class="group flex items-center justify-between p-4 bg-blue-50 dark:bg-blue-950/40 hover:bg-blue-100 dark:hover:bg-blue-900/40 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800/80 rounded-xl transition-all active:scale-95 text-left text-base font-bold">
+                            <span class="flex items-center gap-3">
+                                <span class="p-2 bg-blue-500 text-white rounded-lg group-hover:scale-110 transition-transform"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></span>
                                 สไลด์ขวา (Slide Right)
                             </span>
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
                         </button>
 
-                        <!-- เช็คกำแพง -->
-                        <button onclick="addBlock('CHECK_WALL')" class="group flex items-center justify-between p-3 bg-amber-50 dark:bg-amber-950/40 hover:bg-amber-100 dark:hover:bg-amber-900/40 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800/80 rounded-xl transition-all active:scale-95 text-left text-sm font-semibold">
-                            <span class="flex items-center gap-2.5">
-                                <span class="p-1.5 bg-amber-500 text-white rounded-lg group-hover:scale-110 transition-transform"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M4 22h16"/><path d="M12 2v16"/><path d="m8 14 4 4 4-4"/></svg></span>
+                        <button onclick="addBlock('CHECK_WALL')" onmouseenter="speakCommand('เช็คกำแพง')" class="group flex items-center justify-between p-4 bg-amber-50 dark:bg-amber-950/40 hover:bg-amber-100 dark:hover:bg-amber-900/40 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800/80 rounded-xl transition-all active:scale-95 text-left text-base font-bold mt-2">
+                            <span class="flex items-center gap-3">
+                                <span class="p-2 bg-amber-500 text-white rounded-lg group-hover:scale-110 transition-transform"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M4 22h16"/><path d="M12 2v16"/><path d="m8 14 4 4 4-4"/></svg></span>
                                 เช็คกำแพง (Check Wall)
                             </span>
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
                         </button>
 
-                        <!-- จ่ายวัตถุ -->
-                        <button onclick="addBlock('DISPENSE')" class="group flex items-center justify-between p-3 bg-teal-50 dark:bg-teal-950/40 hover:bg-teal-100 dark:hover:bg-teal-900/40 text-teal-700 dark:text-teal-300 border border-teal-200 dark:border-teal-800/80 rounded-xl transition-all active:scale-95 text-left text-sm font-semibold">
-                            <span class="flex items-center gap-2.5">
-                                <span class="p-1.5 bg-teal-500 text-white rounded-lg group-hover:scale-110 transition-transform"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline></svg></span>
+                        <button onclick="addBlock('DISPENSE')" onmouseenter="speakCommand('จ่ายวัตถุ')" class="group flex items-center justify-between p-4 bg-purple-50 dark:bg-purple-950/40 hover:bg-purple-100 dark:hover:bg-purple-900/40 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-800/80 rounded-xl transition-all active:scale-95 text-left text-base font-bold mt-2">
+                            <span class="flex items-center gap-3">
+                                <span class="p-2 bg-purple-500 text-white rounded-lg group-hover:scale-110 transition-transform"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline></svg></span>
                                 จ่ายวัตถุ (Dispense)
                             </span>
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
                         </button>
                     </div>
                 </div>
 
-                <!-- 2. ส่วนแสดงการเชื่อมต่อ (Hardware Status) -->
                 <div class="bg-white dark:bg-slate-800 p-5 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 transition-colors">
                     <h2 class="text-base font-semibold text-slate-700 dark:text-slate-200 mb-3 flex items-center gap-2">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-slate-500 dark:text-slate-400"><path d="M12 20a8 8 0 1 0 0-16 8 8 0 0 0 0 16Z"/><path d="M12 14a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z"/><path d="M12 2v2"/><path d="M12 20v2"/></svg>
@@ -194,106 +154,95 @@
                     
                     <div class="flex items-center justify-between pb-1 transition-colors">
                         <div class="flex items-center gap-2">
-                            <div id="status-indicator" class="w-3 h-3 rounded-full bg-slate-300 dark:bg-slate-600 transition-colors"></div>
-                            <span id="connection-status" class="text-sm font-medium text-slate-600 dark:text-slate-300 transition-colors">ยังไม่เชื่อมต่อ</span>
+                            <div id="status-indicator" class="w-4 h-4 rounded-full bg-slate-300 dark:bg-slate-600 transition-colors"></div>
+                            <span id="connection-status" class="text-base font-medium text-slate-600 dark:text-slate-300 transition-colors">ยังไม่เชื่อมต่อ</span>
                         </div>
-                        <button id="connect-btn" onclick="connectArduino()" class="text-xs flex items-center gap-1.5 px-3 py-2 bg-slate-800 dark:bg-slate-700 hover:bg-slate-700 dark:hover:bg-slate-600 text-white rounded-lg transition-colors disabled:opacity-50">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"/><path d="M12 12v9"/><path d="m8 17 4 4 4-4"/></svg>
+                        <button id="connect-btn" onclick="connectArduino()" class="text-sm flex items-center gap-1.5 px-4 py-2 bg-slate-800 dark:bg-slate-700 hover:bg-slate-700 dark:hover:bg-slate-600 text-white rounded-lg transition-colors disabled:opacity-50">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"/><path d="M12 12v9"/><path d="m8 17 4 4 4-4"/></svg>
                             เชื่อมต่อ
                         </button>
                     </div>
                 </div>
             </div>
 
-            <!-- ================= พาเนลกลาง (5/12): พื้นที่เขียนโปรแกรมแบบบล็อก (Visual Workspace) ================= -->
             <div class="lg:col-span-5 flex flex-col h-full min-h-[500px] max-h-[850px]">
                 <div class="bg-white dark:bg-slate-800 p-5 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 transition-colors flex flex-col h-full flex-1">
                     <div class="flex justify-between items-center mb-4 pb-2 border-b border-slate-100 dark:border-slate-700 transition-colors">
                         <div>
-                            <h2 class="text-lg font-bold text-slate-700 dark:text-slate-200">พื้นที่โปรแกรมมิ่ง (Workspace)</h2>
-                            <p class="text-xs text-slate-400 dark:text-slate-500">บล็อกคำสั่งจะทำงานจากบนลงล่างตามลำดับรอยหยัก</p>
+                            <h2 class="text-xl font-bold text-slate-700 dark:text-slate-200">พื้นที่โปรแกรมมิ่ง</h2>
+                            <p class="text-sm text-slate-400 dark:text-slate-500">บล็อกจิกซอว์จะถูกเชื่อมต่อเข้าด้วยกันตามลำดับ</p>
                         </div>
                         <div class="flex gap-2">
-                            <button id="clear-btn" onclick="clearBlocks()" class="text-xs flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 disabled:opacity-50 transition-colors" title="ล้างบล็อกทั้งหมด">
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/></svg>
+                            <button id="clear-btn" onclick="clearBlocks()" class="text-sm flex items-center gap-1 px-3 py-2 rounded-lg text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 disabled:opacity-50 transition-colors" title="ล้างบล็อกทั้งหมด">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/></svg>
                                 ล้างทั้งหมด
                             </button>
                         </div>
                     </div>
 
-                    <!-- พื้นที่แสดงบล็อก Scratch-style (รองรับ Drag & Drop) -->
                     <div id="workspace-container" 
-                         class="flex-1 overflow-y-auto bg-slate-100 dark:bg-slate-900/40 border border-dashed border-slate-300 dark:border-slate-700 rounded-xl p-4 space-y-0.5 min-h-[400px] transition-colors relative"
+                         class="flex-1 overflow-y-auto bg-slate-100 dark:bg-slate-900/40 border border-dashed border-slate-300 dark:border-slate-700 rounded-xl p-4 min-h-[400px] transition-colors relative"
                          ondragover="allowDrop(event)" 
                          ondrop="handleWorkspaceDrop(event)">
                         
-                        <!-- ถ้าไม่มีบล็อกเลยจะโชว์ส่วนนี้ -->
                         <div id="empty-workspace-msg" class="absolute inset-0 flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 p-4 text-center pointer-events-none transition-opacity">
-                            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="mb-3 text-slate-300 dark:text-slate-600"><rect x="3" y="3" width="18" height="18" rx="2" stroke-dasharray="4"/><path d="M12 8v8M8 12h8"/></svg>
-                            <p class="font-medium text-sm">ยังไม่มีคำสั่งในพื้นที่ทำงาน</p>
-                            <p class="text-xs mt-1 text-slate-400">กดเลือกบล็อกคำสั่งด้านซ้ายเพื่อเขียนโปรแกรม</p>
+                            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="mb-3 text-slate-300 dark:text-slate-600"><rect x="3" y="3" width="18" height="18" rx="2" stroke-dasharray="4"/><path d="M12 8v8M8 12h8"/></svg>
+                            <p class="font-medium text-lg">ยังไม่มีคำสั่งในพื้นที่ทำงาน</p>
+                            <p class="text-sm mt-1 text-slate-400">กดเลือกบล็อกคำสั่งด้านซ้ายเพื่อเขียนโปรแกรม</p>
                         </div>
 
-                        <!-- รายการบล็อกจะถูกเรนเดอร์ผ่าน JS -->
-                        <div id="block-list" class="space-y-[2px] relative z-10"></div>
+                        <div id="block-list" class="-space-y-2 relative z-10 pb-4"></div>
                     </div>
 
-                    <!-- ถังขยะสำหรับลากมาปล่อยเพื่อลบ (Drop Zone for Delete) -->
                     <div id="trash-bin" 
-                         class="mt-4 border-2 border-dashed border-red-200 dark:border-red-900/30 bg-red-50/30 dark:bg-red-950/10 rounded-xl p-3 flex items-center justify-center gap-2 text-red-500 dark:text-red-400 text-xs font-semibold transition-all"
+                         class="mt-4 border-2 border-dashed border-red-200 dark:border-red-900/30 bg-red-50/30 dark:bg-red-950/10 rounded-xl p-4 flex items-center justify-center gap-2 text-red-500 dark:text-red-400 text-sm font-bold transition-all"
                          ondragover="allowDrop(event)"
                          ondragenter="highlightTrash(true)"
                          ondragleave="highlightTrash(false)"
                          ondrop="deleteDraggedBlock(event)">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="animate-bounce"><path d="M3 6h18M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2M10 11v6M14 11v6"/></svg>
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="animate-bounce"><path d="M3 6h18M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2M10 11v6M14 11v6"/></svg>
                         <span>ลากบล็อกที่นี่เพื่อลบคำสั่ง</span>
                     </div>
                 </div>
             </div>
 
-            <!-- ================= พาเนลขวา (4/12): พื้นที่จำลอง (Simulator) และสั่งการ ================= -->
             <div class="lg:col-span-4 space-y-6">
-                <!-- 1. Simulator Window -->
                 <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 transition-colors flex flex-col items-center">
                     <div class="mb-4 w-full flex justify-between items-center">
                         <div class="flex items-center gap-2">
-                            <span class="flex h-2 w-2 relative">
+                            <span class="flex h-3 w-3 relative">
                                 <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                                <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                                <span class="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
                             </span>
-                            <h2 class="text-base font-bold text-slate-700 dark:text-slate-200">จอแสดงผลจำลอง (Simulator)</h2>
+                            <h2 class="text-lg font-bold text-slate-700 dark:text-slate-200">จอแสดงผลจำลอง</h2>
                         </div>
-                        <button id="reset-btn" onclick="resetRobot()" class="text-xs flex items-center gap-1 px-3 py-1.5 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 disabled:opacity-50 transition-colors">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+                        <button id="reset-btn" onclick="resetRobot()" class="text-sm flex items-center gap-1 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 disabled:opacity-50 transition-colors font-bold">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
                             เริ่มใหม่
                         </button>
                     </div>
                     
-                    <div id="grid-container" class="grid gap-0 border-2 border-slate-300 dark:border-slate-600 bg-slate-100 dark:bg-slate-900/50 rounded-xl overflow-hidden w-full shadow-inner transition-colors">
-                        <!-- ตารางจะถูกสร้างด้วย JavaScript -->
+                    <div id="grid-container" class="grid gap-0 border-4 border-slate-300 dark:border-slate-600 bg-slate-100 dark:bg-slate-900/50 rounded-xl overflow-hidden w-full shadow-inner transition-colors">
                     </div>
 
-                    <div id="error-msg" class="hidden mt-4 p-3 w-full bg-red-100 dark:bg-red-900/40 text-red-700 dark:text-red-400 border border-red-200 dark:border-red-800/50 rounded-lg text-center font-medium text-xs transition-colors"></div>
+                    <div id="error-msg" class="hidden mt-4 p-3 w-full bg-red-100 dark:bg-red-900/40 text-red-700 dark:text-red-400 border border-red-200 dark:border-red-800/50 rounded-lg text-center font-bold text-sm transition-colors"></div>
                 </div>
 
-                <!-- 2. ส่วนควบคุมการรันคำสั่ง -->
-                <div class="bg-white dark:bg-slate-800 p-5 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 transition-colors space-y-3">
-                    <h2 class="text-sm font-bold text-slate-700 dark:text-slate-200">สั่งการทำงาน</h2>
+                <div class="bg-white dark:bg-slate-800 p-5 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 transition-colors space-y-4">
+                    <h2 class="text-lg font-bold text-slate-700 dark:text-slate-200">สั่งการทำงาน</h2>
                     
-                    <!-- ปุ่มจำลอง (Simulate) -->
-                    <button id="run-btn" onclick="executeBlocks()" class="w-full flex items-center justify-center gap-2 p-3.5 bg-emerald-500 hover:bg-emerald-600 dark:bg-emerald-600 dark:hover:bg-emerald-700 text-white rounded-xl font-bold transition-all disabled:opacity-50 active:scale-95 shadow-md text-base">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><polygon points="6 3 20 12 6 21 6 3"/></svg> 
-                        จำลองบนกระดาน (Simulate)
+                    <button id="run-btn" onclick="executeBlocks()" class="w-full flex items-center justify-center gap-2 p-4 bg-emerald-500 hover:bg-emerald-600 dark:bg-emerald-600 dark:hover:bg-emerald-700 text-white rounded-xl font-bold transition-all disabled:opacity-50 active:scale-95 shadow-md text-lg">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><polygon points="6 3 20 12 6 21 6 3"/></svg> 
+                        จำลองบนกระดาน
                     </button>
 
-                    <!-- ปุ่มส่งโปรแกรมให้หุ่นยนต์จริง -->
-                    <button id="send-btn" onclick="sendBlocksToRobot()" class="w-full flex items-center justify-center gap-2 p-3.5 bg-indigo-500 hover:bg-indigo-600 dark:bg-indigo-600 dark:hover:bg-indigo-700 text-white rounded-xl font-bold transition-all disabled:opacity-50 active:scale-95 shadow-md text-base">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="16" height="16" x="4" y="4" rx="2"/><rect width="6" height="6" x="9" y="9" rx="1"/><path d="M9 2v2"/><path d="M9 20v2"/></svg>
-                        ส่งคำสั่งให้หุ่นยนต์จริง
+                    <button id="send-btn" onclick="sendBlocksToRobot()" class="w-full flex items-center justify-center gap-2 p-4 bg-indigo-500 hover:bg-indigo-600 dark:bg-indigo-600 dark:hover:bg-indigo-700 text-white rounded-xl font-bold transition-all disabled:opacity-50 active:scale-95 shadow-md text-lg">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="16" height="16" x="4" y="4" rx="2"/><rect width="6" height="6" x="9" y="9" rx="1"/><path d="M9 2v2"/><path d="M9 20v2"/></svg>
+                        ส่งให้หุ่นยนต์จริง
                     </button>
                     
-                    <div class="text-[11px] text-slate-400 dark:text-slate-500 text-center italic mt-1">
-                        * ปรับเปลี่ยนลำดับบล็อกได้โดยการลากย้ายบล็อกในพื้นที่ทำงาน
+                    <div class="text-sm text-slate-400 dark:text-slate-500 text-center italic mt-2">
+                        * สามารถสลับลำดับคำสั่งได้โดยการลากย้ายบล็อก
                     </div>
                 </div>
             </div>
@@ -301,12 +250,9 @@
         </div>
     </div>
 
-    <!-- JavaScript ควบคุมการทำงานทั้งหมด -->
     <script>
-        // === การจัดการ Dark Mode ===
         const htmlEl = document.documentElement;
         let isDarkMode = localStorage.getItem('theme') === 'dark';
-        
         if (isDarkMode) htmlEl.classList.add('dark');
 
         function toggleTheme() {
@@ -325,14 +271,24 @@
         function updateThemeIcon() {
             const btn = document.getElementById('theme-toggle-btn');
             if (isDarkMode) {
-                btn.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>`;
+                btn.innerHTML = `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>`;
             } else {
-                btn.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>`;
+                btn.innerHTML = `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>`;
             }
         }
         updateThemeIcon();
 
-        // === ค่าคงที่ของระบบจำลอง ===
+        function speakCommand(text) {
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+                const msg = new SpeechSynthesisUtterance(text);
+                msg.lang = 'th-TH'; 
+                msg.rate = 0.85; 
+                msg.pitch = 1.2; 
+                window.speechSynthesis.speak(msg);
+            }
+        }
+
         const GRID_COLS = 8;
         const GRID_ROWS = 4;
         const DELAY_MS = 600;
@@ -340,152 +296,108 @@
         const DIRECTIONS = { UP: 0, RIGHT: 90, DOWN: 180, LEFT: 270 };
 
         let robotState = { x: 0, y: GRID_ROWS - 1, dir: DIRECTIONS.UP, offset: 0 };
-        
-        /* โครงสร้างรายการบล็อกในคิว (Block Workspace Queue)
-           แต่ละ Block จะมี ID เฉพาะ เพื่อให้สามารถลาก-สลับ หรือกรอกค่าแยกกันได้
-        */
         let blocksWorkspace = [];
         let droppedObjects = []; 
         let isExecuting = false;
-        let currentStepId = null; // เก็บไอดีบล็อกที่กำลังรันเพื่อไฮไลท์
+        let currentStepId = null; 
         let errorMsg = "";
-
-        // ตัวแปรกำหนดการเชื่อมต่อ Serial
         let serialPort;
         let serialWriter;
         let isConnected = false;
-
-        // สำหรับใช้ลากบล็อก (Drag state)
         let draggedBlockId = null;
 
         const icons = {
-            bot: `<svg width="100%" height="100%" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                <rect x="2" y="3" width="4" height="18" rx="1" fill="#cbd5e1"/>
-                <path d="M2 7h4 M2 12h4 M2 17h4"/>
-                <rect x="18" y="3" width="4" height="18" rx="1" fill="#cbd5e1"/>
-                <path d="M18 7h4 M18 12h4 M18 17h4"/>
-                <path d="M 8.5 6 L 8.5 1 L 15.5 1 L 15.5 6 Z" fill="#ccfbf1" stroke="#5eead4" stroke-width="1"/>
-                <rect x="10.5" y="2" width="3" height="2.5" rx="0.5" fill="#14b8a6" stroke="none"/>
-                <rect x="6" y="6" width="12" height="13" rx="2" fill="white"/>
-            </svg>`,
-            arrowUp: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 7-7 7 7"/><path d="M12 19V5"/></svg>`,
-            arrowDown: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="m19 12-7 7-7-7"/></svg>`,
-            rotateCcw: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>`,
-            rotateCw: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/></svg>`,
-            slideLeft: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="m12 19-7-7 7-7"/></svg>`,
-            slideRight: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>`,
-            checkWall: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 22h16"/><path d="M12 2v16"/><path d="m8 14 4 4 4-4"/></svg>`,
-            box: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>`
+            bot: `<svg width="100%" height="100%" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="4" height="18" rx="1" fill="#cbd5e1"/><path d="M2 7h4 M2 12h4 M2 17h4"/><rect x="18" y="3" width="4" height="18" rx="1" fill="#cbd5e1"/><path d="M18 7h4 M18 12h4 M18 17h4"/><path d="M 8.5 6 L 8.5 1 L 15.5 1 L 15.5 6 Z" fill="#ccfbf1" stroke="#5eead4" stroke-width="1"/><rect x="10.5" y="2" width="3" height="2.5" rx="0.5" fill="#14b8a6" stroke="none"/><rect x="6" y="6" width="12" height="13" rx="2" fill="white"/></svg>`,
+            arrowUp: `<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 7-7 7 7"/><path d="M12 19V5"/></svg>`,
+            arrowDown: `<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="m19 12-7 7-7-7"/></svg>`,
+            rotateCcw: `<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>`,
+            rotateCw: `<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/></svg>`,
+            slideLeft: `<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="m12 19-7-7 7-7"/></svg>`,
+            slideRight: `<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>`,
+            checkWall: `<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 22h16"/><path d="M12 2v16"/><path d="m8 14 4 4 4-4"/></svg>`,
+            box: `<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>`
         };
 
-        // นิยามสไตล์และการแสดงผลของแต่ละบล็อกคำสั่งแบบจิกซอว์
+        // เปลี่ยนสีให้สะท้อนถึงการจัดกลุ่ม (หมวดเคลื่อนที่=น้ำเงิน, หมวดเงื่อนไข=ส้ม, หมวดคำสั่งพิเศษ=ม่วง)
         const blockDefinitions = {
             'FORWARD': { 
-                text: 'เดินหน้า (Forward)', 
-                icon: icons.arrowUp, 
-                colorClass: 'bg-blue-500 text-white',
-                borderClass: 'border-blue-600',
-                defaultParams: { val: '10.00' },
+                text: 'เดินหน้า (Forward)', icon: icons.arrowUp, colorClass: 'bg-blue-500 text-white', defaultParams: { val: '10.00' },
                 renderControls: (id, p) => `
-                    <div class="flex items-center gap-1.5 ml-2">
-                        <span class="text-xs opacity-90">ระยะทาง:</span>
+                    <div class="flex items-center gap-2 ml-3">
+                        <span class="text-sm font-medium opacity-90">ระยะทาง:</span>
                         <input type="number" step="0.01" value="${p.val}" onchange="updateBlockParam('${id}', 'val', this.value)" 
-                               class="w-16 px-1.5 py-0.5 text-center text-xs text-slate-800 bg-white font-mono rounded border-none outline-none focus:ring-2 focus:ring-blue-300">
-                        <span class="text-xs opacity-90">ซม.</span>
+                               class="w-20 px-2 py-1 text-center text-base text-slate-800 bg-white font-mono rounded outline-none focus:ring-4 focus:ring-blue-300 shadow-inner">
+                        <span class="text-sm font-medium opacity-90">ซม.</span>
                     </div>`
             },
             'BACKWARD': { 
-                text: 'ถอยหลัง (Backward)', 
-                icon: icons.arrowDown, 
-                colorClass: 'bg-orange-500 text-white',
-                borderClass: 'border-orange-600',
-                defaultParams: { val: '10.00' },
+                text: 'ถอยหลัง (Backward)', icon: icons.arrowDown, colorClass: 'bg-blue-500 text-white', defaultParams: { val: '10.00' },
                 renderControls: (id, p) => `
-                    <div class="flex items-center gap-1.5 ml-2">
-                        <span class="text-xs opacity-90">ระยะทาง:</span>
+                    <div class="flex items-center gap-2 ml-3">
+                        <span class="text-sm font-medium opacity-90">ระยะทาง:</span>
                         <input type="number" step="0.01" value="${p.val}" onchange="updateBlockParam('${id}', 'val', this.value)" 
-                               class="w-16 px-1.5 py-0.5 text-center text-xs text-slate-800 bg-white font-mono rounded border-none outline-none focus:ring-2 focus:ring-orange-300">
-                        <span class="text-xs opacity-90">ซม.</span>
+                               class="w-20 px-2 py-1 text-center text-base text-slate-800 bg-white font-mono rounded outline-none focus:ring-4 focus:ring-blue-300 shadow-inner">
+                        <span class="text-sm font-medium opacity-90">ซม.</span>
                     </div>`
             },
             'TURN_LEFT': { 
-                text: 'หมุนซ้าย (Turn Left)', 
-                icon: icons.rotateCcw, 
-                colorClass: 'bg-purple-500 text-white',
-                borderClass: 'border-purple-600',
-                defaultParams: { val: '90.00' },
+                text: 'หมุนซ้าย (Turn Left)', icon: icons.rotateCcw, colorClass: 'bg-blue-500 text-white', defaultParams: { val: '90.00' },
                 renderControls: (id, p) => `
-                    <div class="flex items-center gap-1.5 ml-2">
-                        <span class="text-xs opacity-90">องศา:</span>
+                    <div class="flex items-center gap-2 ml-3">
+                        <span class="text-sm font-medium opacity-90">องศา:</span>
                         <input type="number" step="0.01" value="${p.val}" onchange="updateBlockParam('${id}', 'val', this.value)" 
-                               class="w-16 px-1.5 py-0.5 text-center text-xs text-slate-800 bg-white font-mono rounded border-none outline-none focus:ring-2 focus:ring-purple-300">
-                        <span class="text-xs opacity-90">°</span>
+                               class="w-20 px-2 py-1 text-center text-base text-slate-800 bg-white font-mono rounded outline-none focus:ring-4 focus:ring-blue-300 shadow-inner">
+                        <span class="text-sm font-medium opacity-90">°</span>
                     </div>`
             },
             'TURN_RIGHT': { 
-                text: 'หมุนขวา (Turn Right)', 
-                icon: icons.rotateCw, 
-                colorClass: 'bg-pink-500 text-white',
-                borderClass: 'border-pink-600',
-                defaultParams: { val: '90.00' },
+                text: 'หมุนขวา (Turn Right)', icon: icons.rotateCw, colorClass: 'bg-blue-500 text-white', defaultParams: { val: '90.00' },
                 renderControls: (id, p) => `
-                    <div class="flex items-center gap-1.5 ml-2">
-                        <span class="text-xs opacity-90">องศา:</span>
+                    <div class="flex items-center gap-2 ml-3">
+                        <span class="text-sm font-medium opacity-90">องศา:</span>
                         <input type="number" step="0.01" value="${p.val}" onchange="updateBlockParam('${id}', 'val', this.value)" 
-                               class="w-16 px-1.5 py-0.5 text-center text-xs text-slate-800 bg-white font-mono rounded border-none outline-none focus:ring-2 focus:ring-pink-300">
-                        <span class="text-xs opacity-90">°</span>
+                               class="w-20 px-2 py-1 text-center text-base text-slate-800 bg-white font-mono rounded outline-none focus:ring-4 focus:ring-blue-300 shadow-inner">
+                        <span class="text-sm font-medium opacity-90">°</span>
                     </div>`
             },
             'SLIDE_LEFT': { 
-                text: 'สไลด์ซ้าย (Slide Left)', 
-                icon: icons.slideLeft, 
-                colorClass: 'bg-cyan-500 text-white',
-                borderClass: 'border-cyan-600',
-                defaultParams: { val: '10.00' },
+                text: 'สไลด์ซ้าย (Slide Left)', icon: icons.slideLeft, colorClass: 'bg-blue-500 text-white', defaultParams: { val: '10.00' },
                 renderControls: (id, p) => `
-                    <div class="flex items-center gap-1.5 ml-2">
-                        <span class="text-xs opacity-90">ระยะทาง:</span>
+                    <div class="flex items-center gap-2 ml-3">
+                        <span class="text-sm font-medium opacity-90">ระยะทาง:</span>
                         <input type="number" step="0.01" value="${p.val}" onchange="updateBlockParam('${id}', 'val', this.value)" 
-                               class="w-16 px-1.5 py-0.5 text-center text-xs text-slate-800 bg-white font-mono rounded border-none outline-none focus:ring-2 focus:ring-cyan-300">
-                        <span class="text-xs opacity-90">ซม.</span>
+                               class="w-20 px-2 py-1 text-center text-base text-slate-800 bg-white font-mono rounded outline-none focus:ring-4 focus:ring-blue-300 shadow-inner">
+                        <span class="text-sm font-medium opacity-90">ซม.</span>
                     </div>`
             },
             'SLIDE_RIGHT': { 
-                text: 'สไลด์ขวา (Slide Right)', 
-                icon: icons.slideRight, 
-                colorClass: 'bg-sky-500 text-white',
-                borderClass: 'border-sky-600',
-                defaultParams: { val: '10.00' },
+                text: 'สไลด์ขวา (Slide Right)', icon: icons.slideRight, colorClass: 'bg-blue-500 text-white', defaultParams: { val: '10.00' },
                 renderControls: (id, p) => `
-                    <div class="flex items-center gap-1.5 ml-2">
-                        <span class="text-xs opacity-90">ระยะทาง:</span>
+                    <div class="flex items-center gap-2 ml-3">
+                        <span class="text-sm font-medium opacity-90">ระยะทาง:</span>
                         <input type="number" step="0.01" value="${p.val}" onchange="updateBlockParam('${id}', 'val', this.value)" 
-                               class="w-16 px-1.5 py-0.5 text-center text-xs text-slate-800 bg-white font-mono rounded border-none outline-none focus:ring-2 focus:ring-sky-300">
-                        <span class="text-xs opacity-90">ซม.</span>
+                               class="w-20 px-2 py-1 text-center text-base text-slate-800 bg-white font-mono rounded outline-none focus:ring-4 focus:ring-blue-300 shadow-inner">
+                        <span class="text-sm font-medium opacity-90">ซม.</span>
                     </div>`
             },
             'CHECK_WALL': { 
-                text: 'เช็คกำแพง (Check Wall)', 
-                icon: icons.checkWall, 
-                colorClass: 'bg-amber-500 text-white',
-                borderClass: 'border-amber-600',
-                defaultParams: { val: '10.00', light: '350', logic: '0' },
+                text: 'เช็คกำแพง (Check Wall)', icon: icons.checkWall, colorClass: 'bg-amber-500 text-white', defaultParams: { val: '10.00', light: '350', logic: '0' },
                 renderControls: (id, p) => `
-                    <div class="flex flex-wrap items-center gap-2 ml-2">
-                        <div class="flex items-center gap-1">
-                            <span class="text-[11px] opacity-90">ชนที่:</span>
+                    <div class="flex flex-wrap items-center gap-3 ml-3">
+                        <div class="flex items-center gap-1.5">
+                            <span class="text-xs font-medium opacity-90">ชนที่:</span>
                             <input type="number" step="0.01" value="${p.val}" onchange="updateBlockParam('${id}', 'val', this.value)" 
-                                   class="w-12 px-1 py-0.5 text-center text-xs text-slate-800 bg-white font-mono rounded border-none outline-none focus:ring-2 focus:ring-amber-300">
-                            <span class="text-[11px] opacity-90">ซม.</span>
+                                   class="w-16 px-1.5 py-1 text-center text-sm text-slate-800 bg-white font-mono rounded outline-none focus:ring-4 focus:ring-amber-300">
+                            <span class="text-xs font-medium opacity-90">ซม.</span>
                         </div>
-                        <div class="flex items-center gap-1">
-                            <span class="text-[11px] opacity-90">แสง:</span>
+                        <div class="flex items-center gap-1.5">
+                            <span class="text-xs font-medium opacity-90">แสง:</span>
                             <input type="number" step="1" value="${p.light}" onchange="updateBlockParam('${id}', 'light', this.value)" 
-                                   class="w-12 px-1 py-0.5 text-center text-xs text-slate-800 bg-white font-mono rounded border-none outline-none focus:ring-2 focus:ring-amber-300">
+                                   class="w-16 px-1.5 py-1 text-center text-sm text-slate-800 bg-white font-mono rounded outline-none focus:ring-4 focus:ring-amber-300">
                         </div>
-                        <div class="flex items-center gap-1">
+                        <div class="flex items-center gap-1.5">
                             <select onchange="updateBlockParam('${id}', 'logic', this.value)" 
-                                    class="px-1 py-0.5 text-xs text-slate-800 bg-white rounded border-none outline-none focus:ring-2 focus:ring-amber-300">
+                                    class="px-2 py-1 text-sm text-slate-800 bg-white rounded outline-none focus:ring-4 focus:ring-amber-300 cursor-pointer">
                                 <option value="0" ${p.logic === '0' ? 'selected' : ''}>&lt; (น้อยกว่า)</option>
                                 <option value="1" ${p.logic === '1' ? 'selected' : ''}>&gt; (มากกว่า)</option>
                             </select>
@@ -493,24 +405,16 @@
                     </div>`
             },
             'DISPENSE': { 
-                text: 'จ่ายวัตถุ (Dispense Object)', 
-                icon: icons.box, 
-                colorClass: 'bg-teal-500 text-white',
-                borderClass: 'border-teal-600',
-                defaultParams: {},
+                text: 'จ่ายวัตถุ (Dispense)', icon: icons.box, colorClass: 'bg-purple-500 text-white', defaultParams: {},
                 renderControls: (id, p) => `
-                    <div class="ml-2">
-                        <span class="text-xs opacity-90 bg-teal-600/50 px-2 py-0.5 rounded">จ่าย 1 ชิ้น</span>
+                    <div class="ml-3">
+                        <span class="text-sm font-bold bg-purple-700/50 px-3 py-1.5 rounded-lg shadow-sm border border-purple-400/30">จ่าย 1 ชิ้น</span>
                     </div>`
             }
         };
 
-        // เชื่อมต่อ Web Serial API
         async function connectArduino() {
-            if (!("serial" in navigator)) {
-                showError("เบราว์เซอร์ของคุณไม่รองรับ Web Serial API");
-                return;
-            }
+            if (!("serial" in navigator)) { showError("เบราว์เซอร์ของคุณไม่รองรับ Web Serial API"); return; }
             try {
                 serialPort = await navigator.serial.requestPort();
                 await serialPort.open({ baudRate: 9600 });
@@ -518,45 +422,27 @@
                 isConnected = true;
                 errorMsg = ""; 
                 render();
-            } catch (error) {
-                showError("ไม่สามารถเชื่อมต่อได้");
-            }
+            } catch (error) { showError("ไม่สามารถเชื่อมต่อได้"); }
         }
 
         function showError(msg) {
             errorMsg = msg;
             render();
-            setTimeout(() => {
-                if(errorMsg === msg) {
-                    errorMsg = "";
-                    render();
-                }
-            }, 5000);
+            setTimeout(() => { if(errorMsg === msg) { errorMsg = ""; render(); } }, 5000);
         }
-
-        // === ฟังก์ชันการทำงานของ Workspace และ Blocks ===
 
         function addBlock(cmdType) {
             if (isExecuting) return;
             const def = blockDefinitions[cmdType];
             const uniqueId = 'block_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5);
-            
-            // สร้างบล็อกพร้อมตั้งค่าพารามิเตอร์เริ่มต้น
-            blocksWorkspace.push({
-                id: uniqueId,
-                type: cmdType,
-                params: { ...def.defaultParams }
-            });
-            
+            blocksWorkspace.push({ id: uniqueId, type: cmdType, params: { ...def.defaultParams } });
             render();
             scrollToBottomWorkspace();
         }
 
         function updateBlockParam(blockId, paramName, value) {
             const block = blocksWorkspace.find(b => b.id === blockId);
-            if (block) {
-                block.params[paramName] = value;
-            }
+            if (block) block.params[paramName] = value;
         }
 
         function removeBlock(blockId) {
@@ -580,22 +466,14 @@
             }, 50);
         }
 
-        // === Drag and Drop Logic (สไตล์ Scratch) ===
-
         function handleDragStart(event, blockId) {
-            if (isExecuting) {
-                event.preventDefault();
-                return;
-            }
+            if (isExecuting) { event.preventDefault(); return; }
             draggedBlockId = blockId;
             event.dataTransfer.effectAllowed = 'move';
-            // สำหรับใช้ลบเมื่อลากลงถังขยะ
             event.dataTransfer.setData('text/plain', blockId);
-            
-            // ทำให้บล็อกโปร่งใสขณะโดนลาก
             setTimeout(() => {
                 const el = document.getElementById(blockId);
-                if (el) el.style.opacity = '0.4';
+                if (el) el.style.opacity = '0.3';
             }, 0);
         }
 
@@ -603,29 +481,19 @@
             const el = document.getElementById(blockId);
             if (el) el.style.opacity = '1';
             draggedBlockId = null;
-            
-            // ล้างสถานะสีถังขยะ
             highlightTrash(false);
-            
-            // ลบขีดบอกจุดวางทั้งหมดบนหน้าจอ
-            document.querySelectorAll('.drag-over-line').forEach(line => line.remove());
         }
 
-        function allowDrop(event) {
-            event.preventDefault();
-        }
+        function allowDrop(event) { event.preventDefault(); }
 
         function handleWorkspaceDrop(event) {
             event.preventDefault();
             if (!draggedBlockId) return;
 
-            // ค้นหาระยะและลำดับเพื่อทำการย้ายบล็อกแทรกไปยังตำแหน่งใหม่
             const blockElements = Array.from(document.querySelectorAll('#block-list > .robot-block-wrapper'));
-            const containerRect = document.getElementById('block-list').getBoundingClientRect();
             const dropY = event.clientY;
 
-            let targetIndex = blocksWorkspace.length; // ค่าเริ่มต้นคือต่อท้ายสุด
-
+            let targetIndex = blocksWorkspace.length; 
             for (let i = 0; i < blockElements.length; i++) {
                 const rect = blockElements[i].getBoundingClientRect();
                 const midPoint = rect.top + (rect.height / 2);
@@ -635,45 +503,29 @@
                 }
             }
 
-            // ย้ายข้อมูลตำแหน่งบล็อกในอาเรย์
             const srcIndex = blocksWorkspace.findIndex(b => b.id === draggedBlockId);
             if (srcIndex !== -1) {
                 const [draggedBlock] = blocksWorkspace.splice(srcIndex, 1);
-                
-                // คำนวณ Index ปลายทางหลังจากการสไลด์อาเรย์ออกไป
                 let finalIndex = targetIndex;
-                if (srcIndex < targetIndex) {
-                    finalIndex = targetIndex - 1;
-                }
+                if (srcIndex < targetIndex) finalIndex = targetIndex - 1;
                 if (finalIndex < 0) finalIndex = 0;
-                
                 blocksWorkspace.splice(finalIndex, 0, draggedBlock);
             }
-
             render();
         }
 
-        // ไฮไลท์ถังขยะเมื่อมีบล็อกลากมาวาง
         function highlightTrash(isHighlighted) {
             const trash = document.getElementById('trash-bin');
-            if (isHighlighted) {
-                trash.classList.add('bg-red-200', 'dark:bg-red-950/40', 'border-red-500', 'text-red-600', 'scale-[1.02]');
-            } else {
-                trash.classList.remove('bg-red-200', 'dark:bg-red-950/40', 'border-red-500', 'text-red-600', 'scale-[1.02]');
-            }
+            if (isHighlighted) trash.classList.add('bg-red-200', 'dark:bg-red-950/40', 'border-red-500', 'text-red-600', 'scale-[1.02]');
+            else trash.classList.remove('bg-red-200', 'dark:bg-red-950/40', 'border-red-500', 'text-red-600', 'scale-[1.02]');
         }
 
-        // ลบบล็อกที่ลากมาโยนใส่ถังขยะ
         function deleteDraggedBlock(event) {
             event.preventDefault();
             const id = event.dataTransfer.getData('text/plain');
-            if (id) {
-                removeBlock(id);
-            }
+            if (id) removeBlock(id);
             highlightTrash(false);
         }
-
-        // === ฟังก์ชันสำหรับสั่งการประมวลผลและการเรนเดอร์ ===
 
         function resetRobot() {
             if (isExecuting) return;
@@ -684,7 +536,6 @@
         }
 
         function render() {
-            // 1. เรนเดอร์ Simulator Grid
             const gridEl = document.getElementById('grid-container');
             gridEl.style.gridTemplateColumns = `repeat(${GRID_COLS}, minmax(0, 1fr))`;
             gridEl.innerHTML = '';
@@ -695,17 +546,16 @@
                     if (col === 0 && row === GRID_ROWS - 1) {
                         cell.className = 'aspect-square border border-slate-300 dark:border-slate-700 bg-red-100 dark:bg-red-950/30 flex items-center justify-center relative transition-colors';
                         const startLabel = document.createElement('span');
-                        startLabel.className = 'absolute bottom-1 text-[9px] sm:text-[10px] font-bold text-red-600 dark:text-red-400';
+                        startLabel.className = 'absolute bottom-1 text-xs font-bold text-red-600 dark:text-red-400';
                         startLabel.innerText = 'START';
                         cell.appendChild(startLabel);
                     } else {
                         cell.className = 'aspect-square border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 flex items-center justify-center relative transition-colors';
                     }
                     
-                    // วาดวัตถุที่ถูกจ่ายไว้
                     droppedObjects.filter(obj => obj.x === col && obj.y === row).forEach(obj => {
                         const objDot = document.createElement('div');
-                        objDot.className = 'absolute w-1/4 h-1/4 bg-teal-500 border border-teal-600 dark:border-teal-400 rounded-sm shadow-md z-0 opacity-90 animate-pulse';
+                        objDot.className = 'absolute w-1/3 h-1/3 bg-teal-500 border-2 border-teal-600 dark:border-teal-400 rounded-md shadow-md z-0 opacity-90 animate-pulse';
                         if (obj.dir === 0) { objDot.style.top = '22%'; objDot.style.left = '50%'; }
                         else if (obj.dir === 90) { objDot.style.top = '50%'; objDot.style.left = '78%'; }
                         else if (obj.dir === 180) { objDot.style.top = '78%'; objDot.style.left = '50%'; }
@@ -714,11 +564,10 @@
                         cell.appendChild(objDot);
                     });
 
-                    // วาดตัวหุ่นยนต์พร้อมทิศทาง
                     if (robotState.x === col && robotState.y === row) {
                         const bot = document.createElement('div');
                         const offsetStyle = robotState.offset ? ` translateY(${robotState.offset}%)` : '';
-                        bot.className = 'absolute w-3/4 h-3/4 transition-all duration-300 ease-in-out text-blue-600 dark:text-blue-400 drop-shadow-lg z-10 flex items-center justify-center';
+                        bot.className = 'absolute w-4/5 h-4/5 transition-all duration-300 ease-in-out text-blue-600 dark:text-blue-400 drop-shadow-xl z-10 flex items-center justify-center';
                         bot.style.transform = `rotate(${robotState.dir}deg)${offsetStyle}`;
                         bot.innerHTML = icons.bot;
                         cell.appendChild(bot);
@@ -727,24 +576,22 @@
                 }
             }
 
-            // 2. เรนเดอร์ส่วนติดต่อสื่อสารของฮาร์ดแวร์
             const statusInd = document.getElementById('status-indicator');
             const statusTxt = document.getElementById('connection-status');
             const connectBtn = document.getElementById('connect-btn');
             
             if (isConnected) {
-                statusInd.className = 'w-3 h-3 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)] transition-colors';
+                statusInd.className = 'w-4 h-4 rounded-full bg-emerald-500 shadow-[0_0_12px_rgba(16,185,129,0.6)] transition-colors';
                 statusTxt.innerText = 'เชื่อมต่อแล้ว';
-                statusTxt.className = 'text-sm font-medium text-emerald-600 dark:text-emerald-400 transition-colors';
+                statusTxt.className = 'text-base font-bold text-emerald-600 dark:text-emerald-400 transition-colors';
                 connectBtn.disabled = true;
             } else {
-                statusInd.className = 'w-3 h-3 rounded-full bg-slate-300 dark:bg-slate-600 transition-colors';
+                statusInd.className = 'w-4 h-4 rounded-full bg-slate-300 dark:bg-slate-600 transition-colors';
                 statusTxt.innerText = 'ยังไม่เชื่อมต่อ';
-                statusTxt.className = 'text-sm font-medium text-slate-500 dark:text-slate-400 transition-colors';
+                statusTxt.className = 'text-base font-medium text-slate-500 dark:text-slate-400 transition-colors';
                 connectBtn.disabled = false;
             }
 
-            // 3. เรนเดอร์บล็อกในพื้นที่โปรแกรมทำงาน (Workspace Block List)
             const blockListEl = document.getElementById('block-list');
             const emptyMsgEl = document.getElementById('empty-workspace-msg');
 
@@ -758,45 +605,49 @@
                     const def = blockDefinitions[block.type];
                     const isActive = currentStepId === block.id;
                     
-                    // ปรับแต่งสีและอนิเมชันเมื่อรันคำสั่งทำงาน
-                    const activeHighlight = isActive 
-                        ? 'ring-4 ring-emerald-400 ring-offset-2 dark:ring-offset-slate-900 scale-[1.02] shadow-lg relative z-20 animate-pulse' 
-                        : 'opacity-100 hover:scale-[1.01] hover:shadow-md';
+                    // กำหนด Z-index แบบย้อนกลับเพื่อให้บล็อกบนเงาตกกระทบบล็อกล่าง
+                    const zIndex = 100 - index;
                     
+                    // หากกำลังประมวลผล ให้แสดงเงาเรืองแสงสีเขียว
+                    const dropShadow = isActive 
+                        ? 'drop-shadow(0 0 10px rgba(52,211,153,0.9))' 
+                        : 'drop-shadow(0 3px 2px rgba(0,0,0,0.3))';
+                        
+                    const transformScale = isActive ? 'scale(1.02)' : 'scale(1)';
+                    const wrapperStyle = `z-index: ${zIndex}; filter: ${dropShadow}; transform: ${transformScale};`;
+
                     const controlsHtml = def.renderControls(block.id, block.params);
+                    const speakText = def.text.split(' (')[0]; 
                     
+                    // คลาส hover เพิ่มความสว่างแทนการใช้เงาเพื่อไม่ให้ตีกับคลิปพาร์ท
+                    const hoverClass = !isExecuting ? 'hover:brightness-110' : '';
+
                     return `
-                        <div class="robot-block-wrapper relative pb-[4px]">
-                            <!-- บล็อก Scratch-style -->
+                        <div class="robot-block-wrapper" style="${wrapperStyle}">
                             <div id="${block.id}" 
                                  draggable="true"
                                  ondragstart="handleDragStart(event, '${block.id}')"
                                  ondragend="handleDragEnd(event, '${block.id}')"
-                                 class="robot-block block-connection-top ${def.colorClass} ${def.borderClass} ${activeHighlight} border-l-4 border-b-2 rounded-lg p-3 flex flex-wrap items-center gap-2 select-none">
+                                 onmouseenter="speakCommand('${speakText}')"
+                                 class="robot-block jigsaw-block ${def.colorClass} ${hoverClass} pt-4 pb-6 px-4 flex flex-wrap items-center gap-3 select-none">
                                 
-                                <!-- ปลายจับสำหรับลากเลื่อนลำดับ -->
-                                <div class="cursor-grab active:cursor-grabbing text-white/50 hover:text-white mr-1.5 shrink-0" title="ลากเพื่อย้ายตำแหน่ง">
-                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 9h14M5 15h14"/></svg>
+                                <div class="cursor-grab active:cursor-grabbing text-white/50 hover:text-white mr-1 shrink-0" title="ลากเพื่อย้ายตำแหน่ง">
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 9h14M5 15h14"/></svg>
                                 </div>
 
-                                <!-- ลำดับบล็อก -->
-                                <span class="font-mono text-xs font-bold bg-black/20 text-white px-2 py-0.5 rounded-full shrink-0 min-w-[24px] text-center">${index + 1}</span>
+                                <span class="font-mono text-base font-bold bg-black/20 text-white px-3 py-1 rounded-full shrink-0 min-w-[32px] text-center">${index + 1}</span>
                                 
-                                <!-- ไอคอนคำสั่ง -->
                                 <div class="shrink-0 text-white">${def.icon}</div>
                                 
-                                <!-- ข้อความคำสั่ง -->
-                                <span class="font-bold text-sm select-none shrink-0">${def.text}</span>
+                                <span class="font-bold text-lg select-none shrink-0">${def.text}</span>
                                 
-                                <!-- ส่วนควบคุมและกรอกตัวเลขภายในตัวบล็อก -->
                                 <div class="flex-1 min-w-[120px]">
                                     ${controlsHtml}
                                 </div>
 
-                                <!-- ปุ่มลบเดี่ยวประจำบล็อก -->
                                 ${!isExecuting ? `
-                                    <button onclick="removeBlock('${block.id}')" class="ml-auto text-white/60 hover:text-white hover:bg-black/20 p-1.5 rounded-lg transition-colors">
-                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                                    <button onclick="removeBlock('${block.id}')" class="ml-auto text-white/70 hover:text-white hover:bg-black/20 p-2 rounded-xl transition-colors relative z-20">
+                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
                                     </button>
                                 ` : ''}
                             </div>
@@ -805,7 +656,6 @@
                 }).join('');
             }
 
-            // 4. ตั้งค่าปุ่มกดด้านล่างให้ตอบสนองกับสถานะการทำงาน
             const errorEl = document.getElementById('error-msg');
             if (errorMsg) { errorEl.innerText = errorMsg; errorEl.classList.remove('hidden'); } 
             else { errorEl.classList.add('hidden'); }
@@ -813,14 +663,13 @@
             document.getElementById('reset-btn').disabled = isExecuting;
             document.getElementById('clear-btn').disabled = isExecuting || blocksWorkspace.length === 0;
             
-            // บล็อกไม่ให้แก้ไขค่าและห้ามลากขนาดรันโมเดลอยู่
             document.querySelectorAll('#block-list input, #block-list select').forEach(el => el.disabled = isExecuting);
             
             const runBtn = document.getElementById('run-btn');
             runBtn.disabled = isExecuting || blocksWorkspace.length === 0;
             runBtn.innerHTML = isExecuting 
-                ? `<svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white inline-block" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> กำลังประมวลผล...` 
-                : `<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" class="inline-block"><polygon points="6 3 20 12 6 21 6 3"/></svg> จำลองบนกระดาน (Simulate)`;
+                ? `<svg class="animate-spin -ml-1 mr-3 h-6 w-6 text-white inline-block" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> กำลังประมวลผล...` 
+                : `<svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" class="inline-block"><polygon points="6 3 20 12 6 21 6 3"/></svg> จำลองบนกระดาน`;
 
             const sendBtn = document.getElementById('send-btn');
             sendBtn.disabled = isExecuting || blocksWorkspace.length === 0 || !isConnected;
@@ -828,7 +677,6 @@
 
         const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
-        // === ฟังก์ชันสำหรับรันจำลองภาพบนหน้าจอ (Execute Workspace) ===
         async function executeBlocks() {
             if (blocksWorkspace.length === 0 || isExecuting) return;
             isExecuting = true;
@@ -876,7 +724,6 @@
                     robotState.offset = 0; 
                 }
 
-                // ป้องกันกรณีหุ่นยนต์เดินตกขอบแผนที่
                 if (x < 0 || x >= GRID_COLS || y < 0 || y >= GRID_ROWS) {
                     showError("ระวัง! หุ่นยนต์ชนขอบพื้นที่แผนที่");
                     isExecuting = false;
@@ -895,7 +742,6 @@
             render();
         }
 
-        // === ฟังก์ชันสำหรับแปลงคำสั่งและส่งสัญญาณไปยังฮาร์ดแวร์ผ่าน Web Serial ===
         async function sendBlocksToRobot() {
             if (blocksWorkspace.length === 0 || isExecuting || !isConnected || !serialWriter) return;
             isExecuting = true;
@@ -927,7 +773,6 @@
                         droppedObjects.push({ x: robotState.x, y: robotState.y, dir: robotState.dir }); 
                     }
 
-                    // ปรับตำแหน่งจำลองของหุ่นยนต์ตามหลังจากการส่งคำสั่งพอร์ต
                     if (block.type !== 'DISPENSE' && block.type !== 'CHECK_WALL') {
                         let { x, y, dir } = robotState;
                         if (block.type === 'FORWARD') { 
@@ -953,7 +798,6 @@
                     
                     render();
                     
-                    // ส่งคำสั่งแบบสตรีมข้อมูลผ่านพอร์ต Serial
                     await serialWriter.write(textEncoder.encode(commandToSend));
                     await sleep(ROBOT_DELAY_MS);
                 }
@@ -967,7 +811,6 @@
             }
         }
 
-        // เริ่มต้นสร้างตารางจำลองในตอนโหลดหน้าเว็บ
         render();
     </script>
 </body>
